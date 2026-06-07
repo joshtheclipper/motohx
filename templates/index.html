@@ -5,8 +5,28 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>OmniPanel</title>
     </head>
-    <body>
-        <h1>OmniPanel Dashboard</h1>
-        <p>This page is now loading from a real HTML file!</p>
+
+        <h1>OmniPanel: Car Maintenance Tracker</h1>
+
+        <h2> Add New Maintenance</h2>
+        <form action="/" method="POST">
+
+            <input type="date" name="date" required>
+            <input type="text" name="service" placeholder="Service (e.g. Oil Change)">
+            <input type="number" name="mileage" placeholder="Mileage" required>
+
+            <button type="submit">Add Record</button>
+
+        </form>
+        <p>Here is the serice history:</p>
+
+        <ul>
+            {% for log in logs %}
+            <li>
+                <strong>{{ log.date }}</strong> - {{ log.service}} miles: {{
+                log.mileage }}
+            </li>
+            {% endfor %}
+        </ul>
     </body>
 </html>
