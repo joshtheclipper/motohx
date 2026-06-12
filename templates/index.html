@@ -40,6 +40,14 @@
             }
             button:hover { background-color: #27ae60; }
 
+            /* Target an element ONLY if it has both classes applied */
+            .tab-button.active {
+                background-color: #2ecc71 !important; /* Matches your beautiful green 'Add Record' button */
+                color: white !important;
+                font-weight: bold;
+                box-shadow: 0 2px 8px rgba(46, 204, 113, 0.4); /* Gives it a slight intentional glow */
+            }
+
             /* Style the maintenance history list */
             ul { list-style-type: none; padding: 0; }
             li {
@@ -73,13 +81,28 @@
             <input type="number" name="mileage" placeholder="Mileage" required>
             <button type="submit">Add Record</button>
 
+            <div class="tab-container" style="margin-top: 30px; margin-bottom: 15px; display: flex; gap: 10px;">
+
+                <a href="/" class="tab-button {% if active_tab == 'All' %}active{% endif %}"
+                   style="padding: 8px 16px; text-decoration: none; border-radius: 4px; background: #e0e0e0; color: #333;">
+                   All Services
+                </a>
+
+                {% for tab in tabs %}
+                    <a href="/?tab={{ tab|urlencode }}" class="tab-button {% if active_tab == tab %}active{% endif %}"
+                       style="padding: 8px 16px; text-decoration: none; border-radius: 4px; background: #e0e0e0; color: #333;">
+                       {{ tab }}
+                    </a>
+                {% endfor %}
+            </div>
+
         </form>
         <p><strong>Service History:</strong></p>
 
         <ul>
             {% for log in logs %}
             <li>
-                <strong>{{ log.date }}</strong> - {{ log.service}} (miles: {{log.mileage }})
+                <strong>{{ log.date }}</strong> - {{ log.service }} (miles: {{ "{:,}".format(log.mileage) }})
                 <form action="/delete/{{ log.id }}" method="POST" style="display:inline;">
                     <button type="submit" style="color: red; margin-left: 10px; cursor: pointer;">remove</button>
                 </form>

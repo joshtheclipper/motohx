@@ -1,6 +1,7 @@
 import sqlite3
 
 from flask import Flask, redirect, render_template, request
+from flask.ctx import copy_current_request_context
 
 app = Flask(__name__)
 
@@ -57,16 +58,26 @@ def home():
         conn.close()
         return redirect("/")
 
-    # IF GET: The user is just loading the homepage
+    # IF GET: The user is loading the homepage
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM maintenance ORDER BY mileage DESC")
+    current_tab = request.args.get("tab", "All")
+
+    # Change our SQL query based on what tab is active
+    if current_tab == "All":
+        cursor.execute("SELECT * FROM maintenance ORDER BY mileage DESC")
+    else:
+        cursor.execute(
+            "SELECT * FROM maintenance WHERE service = ? ORDER BY mileage DESC",
+            (current_tab,),
+        )
+
     records = cursor.fetchall()
+
     cursor.execute("SELECT DISTINCT service FROM maintenance")
     past_services_rows = cursor.fetchall()
-
     past_services = [row["service"] for row in past_services_rows]
 
     default_services = [
@@ -82,7 +93,13 @@ def home():
 
     conn.close()
 
-    return render_template("index.html", logs=records, service_options=all_options)
+    return render_template(
+        "index.html",
+        logs=records,
+        service_options=all_options,
+        tabs=past_services,
+        active_tab=current_tab,
+    )
 
 
 @app.route("/delete/<int:record_id>", methods=["POST"])
